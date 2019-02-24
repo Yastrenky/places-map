@@ -1,24 +1,36 @@
 import React from 'react';
-import { StyleSheet, View, Button } from 'react-native';
+import { StyleSheet, View, Button, Text } from 'react-native';
+import {NavigationActions} from 'react-navigation';
+import { DrawerActions } from 'react-navigation';
 
 export default class Dashborad extends React.Component {
+
+    navigateToScreen = (route) => () => {
+        const navigateAction = NavigationActions.navigate({
+          routeName: route
+        });
+        this.props.navigation.dispatch(navigateAction);
+        this.props.navigation.dispatch(DrawerActions.closeDrawer())
+      }
+
     render() {
 
         var {navigate} = this.props.navigation;
         return (
             <View style={styles.container}>
-                <View style={{ marginBottom: 20 }}>
+            <Text style={{ marginBottom: 20 }}>Save locations and favorite places</Text>
+                {/* <View style={{ marginBottom: 20 }}>
                     <Button
                         title="Map Location"
-                        onPress={()=> navigate("Map_page")}
+                        onPress={this.navigateToScreen('Map')}
                     />
                 </View>
                 <View style={{ marginBottom: 20 }}>
                     <Button
                         title="Places List"
-                        onPress={()=> navigate("Places_page")}
+                        onPress={this.navigateToScreen('Places')}
                     />
-                </View>
+                </View> */}
             </View>
         );
     }

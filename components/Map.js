@@ -1,16 +1,17 @@
 import React from 'react';
 import { StyleSheet, View, Button } from 'react-native';
-import FetchLocation from './FetchLocation';
 import MapView from 'react-native-maps';
-
+import { NavigationActions } from 'react-navigation';
 
 export default class App extends React.Component {
     state = {
         userLocation: null,
-        userPlaces: []
+        userPlaces: [],
+        reset: false,
     }
 
     getUserLocatioHandler = () => {
+        this.props.navigation.setParams({ latitude: null, longitude: null})
         console.log("Get Location")
         navigator.geolocation.getCurrentPosition(position => {
             this.setState({
@@ -21,7 +22,6 @@ export default class App extends React.Component {
                     longitudeDelta: 0.0421,
                 }
             });
-            console.log(position);
 
             fetch('https://location-map-c88df.firebaseio.com/places.json', {
                 method: 'POST',
@@ -56,19 +56,25 @@ export default class App extends React.Component {
     }
 
     getResetHandler = () => {
+        this.props.navigation.setParams({ latitude: null, longitude: null})
         this.setState({
             userLocation: null,
-            userPlaces: []
+            userPlaces: [],
+            reset: true
         })
+
     }
     render() {
+        console.log("MAp", this.props.navigation.state)
         var userLocation = this.state.userLocation;
         let userLocationMarker = null;
-        if (this.state.userLocation) {
+
+        if (userLocation) {
             userLocationMarker = <MapView.Marker coordinate={this.state.userLocation} />
         }
+        
 
-        if (this.props.navigation.state.params) {
+        if (this.props.navigation.state.params && this.props.navigation.state.params.latitude) {
             var location = {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
@@ -78,16 +84,28 @@ export default class App extends React.Component {
             userLocation = location;
         }
 
+
         const usersMarkers = this.state.userPlaces.map(userPlace => <MapView.Marker coordinate={userPlace} key={userPlace.id} />)
         return (
             <View style={styles.container}>
                 <View style={{ marginBottom: 20 }}>
                     <Button
-                        title="Get user Places"
+                        title="Get all user places"
                         onPress={this.getUserPlacesHandler}
                     />
                 </View>
-                <FetchLocation onGetLocation={this.getUserLocatioHandler} />
+                < View style={{ marginBottom: 20 }}>
+                    <Button
+                        title="Get current location"
+                        onPress={this.getUserLocatioHandler}
+                    />
+                </View>
+                < View style={{ marginBottom: 20 }}>
+                    <Button
+                        title="Clean markers"
+                        onPress={this.getResetHandler}
+                    />
+                </View>
                 <View style={styles.mapContainer}>
                     <MapView
                         style={styles.mapContainer}
@@ -96,15 +114,10 @@ export default class App extends React.Component {
                     >
                         {userLocationMarker}
                         {usersMarkers}
-                        
+
                     </MapView>
                 </View>
-                <View style={{ marginBottom: 20 }}>
-                    <Button
-                        title="Reset"
-                        onPress={this.getResetHandler}
-                    />
-                </View>
+
             </View>
         );
     }
@@ -116,11 +129,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingTop: 10
     },
     mapContainer: {
+        flex: 1,
         width: '100%',
-        height: '70%',
-        marginTop: 20
+        height: '50%',
     },
     map: {
         width: '100%',

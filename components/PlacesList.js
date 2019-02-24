@@ -1,10 +1,25 @@
 import React from 'react';
-import { StyleSheet, View, Button, Text, ScrollView  } from 'react-native';
-import { List, ListItem } from 'react-native-elements'
+import { StyleSheet, View, Button, Text, ScrollView } from 'react-native';
+import {  ListItem } from 'react-native-elements'
+import { NavigationActions } from 'react-navigation';
+import { DrawerActions } from 'react-navigation';
 
 export default class App extends React.Component {
     state = {
         userPlaces: null
+    }
+
+    navigateToScreen = (route, param) => () => {
+        const navigateAction = NavigationActions.navigate({
+            routeName: route
+        });
+        const setParamsAction = NavigationActions.setParams({
+            params: param,
+            key: 'Map',
+        });
+        this.props.navigation.dispatch(setParamsAction);
+        this.props.navigation.dispatch(navigateAction);
+        this.props.navigation.dispatch(DrawerActions.closeDrawer())
     }
 
     getResetHandler = () => {
@@ -34,7 +49,6 @@ export default class App extends React.Component {
     }
     render() {
         const list = this.state.userPlaces
-        var {navigate} = this.props.navigation;
         return (
             <ScrollView >
                 {
@@ -43,7 +57,7 @@ export default class App extends React.Component {
                             key={i}
                             title={l.id}
                             subtitle={"Latitude: " + l.latitude + " Longitude: " + l.longitude}
-                            onPress ={()=> navigate("Map_page",{latitude:l.latitude, longitude:l.longitude})}
+                            onPress={this.navigateToScreen("Map", { latitude: l.latitude, longitude: l.longitude })}
                         />
                     )) : <Text>Loading...</Text>
                 }
